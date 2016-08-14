@@ -53,7 +53,6 @@ import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.Wearable;
 
 import java.lang.ref.WeakReference;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -109,18 +108,14 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService {
             GoogleApiClient.OnConnectionFailedListener,
             DataApi.DataListener {
 
-        // Constants for receiving data at Watch Face
         private static final String PATH_WEATHER = "/weather";
-        private static final String KEY_HIGH = "high_temp";
-        private static final String KEY_LOW = "low_temp";
-        private static final String KEY_ID = "weather_id";
+        private static final String KEY_HIGH = "highTemp";
+        private static final String KEY_LOW = "lowTemp";
+        private static final String KEY_ID = "weatherID";
 
-        // Variables for Weather Conditions
         private String mHighTemp;
         private String mLowTemp;
         private int mWeatherId;
-
-        // Google API Client
         private GoogleApiClient mGoogleApiClient;
 
         final Handler mUpdateTimeHandler = new EngineHandler(this);
@@ -142,8 +137,6 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService {
 
         Calendar mCalendar;
         Date mDate;
-        SimpleDateFormat mDayOfWeekFormat;
-        java.text.DateFormat mDateFormat;
 
         float mXOffset;
         float mXOffsetTime;
@@ -197,7 +190,6 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService {
 
             mCalendar = Calendar.getInstance();
             mDate = new Date();
-            initFormats();
 
             mXOffsetTime = (mTextPaint.measureText("10:00") / 2) + (mAmPmPaint.measureText("AM") / 2);
             mXOffsetDate = mDatePaint.measureText("THU, AUG 22") / 2;
@@ -258,13 +250,6 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService {
             // Whether the timer should be running depends on whether we're visible (as well as
             // whether we're in ambient mode), so we may need to start or stop the timer.
             updateTimer();
-        }
-
-        private void initFormats() {
-            /*mDayOfWeekFormat = new SimpleDateFormat("EEEE", Locale.getDefault());
-            mDayOfWeekFormat.setCalendar(mCalendar);
-            mDateFormat = DateFormat.getDateFormat(SunshineWatchFaceService.this);
-            mDateFormat.setCalendar(mCalendar);*/
         }
 
         private void registerReceiver() {
@@ -460,24 +445,22 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService {
             }
         }
 
-        // Google API Client Listeners
         @Override
         public void onConnected(@Nullable Bundle bundle) {
             Wearable.DataApi.addListener(mGoogleApiClient, this);
-            Log.d("GOOGLE_API_CLIENT", "Connected");
+            Log.d("Watchface service", "Connected");
         }
 
         @Override
         public void onConnectionSuspended(int i) {
-            Log.d("GOOGLE_API_CLIENT", "Connection Suspended");
+            Log.d("Watchface service", "Connection Suspended");
         }
 
         @Override
         public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-            Log.d("GOOGLE_API_CLIENT", "Connection Failed: " + connectionResult.getErrorMessage());
+            Log.d("Watchface service", "Connection Failed: " + connectionResult.getErrorMessage());
         }
 
-        // Wearable Data Change Listener
         @Override
         public void onDataChanged(DataEventBuffer dataEventBuffer) {
             for (DataEvent dataEvent : dataEventBuffer) {
@@ -488,7 +471,7 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService {
                         mHighTemp = dataMap.getString(KEY_HIGH);
                         mLowTemp = dataMap.getString(KEY_LOW);
                         mWeatherId = dataMap.getInt(KEY_ID);
-                        Log.d("WATCH_DATA", " High: " + mHighTemp + " Low: " + mLowTemp + " ID: " + mWeatherId);
+                        Log.d("Weather data", " High: " + mHighTemp + " Low: " + mLowTemp + " ID: " + mWeatherId);
                         invalidate();
                     }
                 }

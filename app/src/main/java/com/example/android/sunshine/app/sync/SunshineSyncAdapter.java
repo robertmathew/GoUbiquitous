@@ -89,11 +89,11 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
     private static final int INDEX_MIN_TEMP = 2;
     private static final int INDEX_SHORT_DESC = 3;
 
-    // Constants for sending data to Watch Face
+
     private static final String PATH_WEATHER = "/weather";
-    private static final String KEY_HIGH = "high_temp";
-    private static final String KEY_LOW = "low_temp";
-    private static final String KEY_ID = "weather_id";
+    private static final String KEY_HIGH = "highTemp";
+    private static final String KEY_LOW = "lowTemp";
+    private static final String KEY_ID = "weatherID";
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({LOCATION_STATUS_OK, LOCATION_STATUS_SERVER_DOWN, LOCATION_STATUS_SERVER_INVALID, LOCATION_STATUS_UNKNOWN, LOCATION_STATUS_INVALID})
@@ -396,9 +396,8 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
         }
     }
 
+    //Updating data for watchface
     private void updateWatchface(Context context) {
-
-        // Query database for weather info
         String location = Utility.getPreferredLocation(context);
         Uri weatherUri = WeatherContract.WeatherEntry.buildWeatherLocationWithStartDate(location, System.currentTimeMillis());
         Cursor cursor = context.getContentResolver().query(weatherUri, NOTIFY_WEATHER_PROJECTION, null, null, null);
@@ -410,18 +409,15 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
             return;
         }
 
-        // Connect Google API client
         GoogleApiClient googleApiClient = new GoogleApiClient.Builder(context)
                 .addApi(Wearable.API)
                 .build();
 
-        // Get result of Google API Client Connection
         ConnectionResult connectionResult = googleApiClient.blockingConnect(30, TimeUnit.SECONDS);
         if (!connectionResult.isSuccess()) {
             return;
         }
 
-        // Send data to Wearable using MapRequest
         PutDataMapRequest mapRequest = PutDataMapRequest.create(PATH_WEATHER);
         DataMap dataMap = mapRequest.getDataMap();
         dataMap.putString(KEY_HIGH, Utility.formatTemperature(context, cursor.getDouble(INDEX_MAX_TEMP)));
@@ -430,10 +426,6 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
         PutDataRequest putDataRequest = mapRequest.asPutDataRequest();
         putDataRequest.setUrgent();
         Wearable.DataApi.putDataItem(googleApiClient, putDataRequest);
-
-        Log.d("WATCH_DATA", "Data sent");
-        Log.d("HIGH", "updateWatchface: " + cursor.getDouble(INDEX_MAX_TEMP));
-        Log.d("WEATHER ID", "updateWatchface: " + cursor.getInt(INDEX_WEATHER_ID));
     }
 
     private void notifyWeather() {
